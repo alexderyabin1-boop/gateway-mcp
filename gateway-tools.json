@@ -2078,6 +2078,160 @@
       "scope": "calendar:write",
       "description": "Create a calendar event (meeting/call). Arguments: calendar_index (from calendar.calendars.list), summary (required), start, end (ISO datetime), description, location, attendee (email). Returns the created event.",
       "status": "implemented"
+    },
+    {
+      "name": "hollihope.students.find",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "students.find",
+      "scope": "hollihope_students:read",
+      "description": "Find students in HolliHope CRM. Arguments: term (name fragment, at least 3 characters; returns at most 10 matches) or student_client_id. Returns id, first and last name, status, disciplines, office, assignees, and parents' first and middle names. Phones, e-mails, addresses and birthdays are never returned. Callers without hollihope_students:all only see students assigned to them.",
+      "keywords": [
+        "hollihope",
+        "hollihop",
+        "crm",
+        "student",
+        "ученик",
+        "найти ученика",
+        "родитель"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.study.enrollments",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "study.enrollments",
+      "scope": "hollihope_study:read",
+      "description": "Groups and attendance of one student. Arguments: student_client_id (required), date_from, date_to (YYYY-MM-DD, default last 60 days, max 400 days). Returns groups with discipline, level, schedule and per-day attendance (date, pass flag, lesson note).",
+      "keywords": [
+        "hollihope",
+        "attendance",
+        "посещаемость",
+        "группа",
+        "занятия",
+        "пропуски"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.study.test_results",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "study.test_results",
+      "scope": "hollihope_study:read",
+      "description": "Test results of one student: regular grades, KIM tests, exams, expected score and surveys, with scores per section. Arguments: student_client_id (required), date_from, date_to (YYYY-MM-DD, optional). Returns group_tests and personal_tests.",
+      "keywords": [
+        "hollihope",
+        "tests",
+        "grades",
+        "оценки",
+        "КИМ",
+        "тест",
+        "ожидаемый балл",
+        "опрос",
+        "ЕГЭ",
+        "ОГЭ"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.study.reports",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "study.reports",
+      "scope": "hollihope_study:read",
+      "description": "Teacher progress reports for one student: criteria scores (homework, class work, mastery, behaviour, motivation, interaction) and the teacher's comment. Arguments: student_client_id (required), date_from, date_to (YYYY-MM-DD, optional).",
+      "keywords": [
+        "hollihope",
+        "report",
+        "отчёт",
+        "успеваемость",
+        "комментарий педагога",
+        "чек-лист"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.reference.test_types",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "reference.test_types",
+      "scope": "hollihope_study:read",
+      "description": "Reference list of HolliHope test categories, test types and their sections with maximum and passing scores. No arguments. Contains no personal data.",
+      "keywords": [
+        "hollihope",
+        "test types",
+        "типы тестов",
+        "справочник",
+        "КИМ"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.reference.disciplines",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "reference.disciplines",
+      "scope": "hollihope_study:read",
+      "description": "Reference list of disciplines taught. No arguments. Contains no personal data.",
+      "keywords": [
+        "hollihope",
+        "disciplines",
+        "предметы",
+        "дисциплины"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.finance.balance",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "finance.balance",
+      "scope": "hollihope_finance:read",
+      "description": "Tuition balance and debt of one student, in money and in lessons, overall and per group. Arguments: student_client_id (required), balance_date (YYYY-MM-DD, default today).",
+      "keywords": [
+        "hollihope",
+        "balance",
+        "debt",
+        "баланс",
+        "задолженность",
+        "долг",
+        "оплата"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.finance.payments",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "finance.payments",
+      "scope": "hollihope_finance:read",
+      "description": "Tuition payments of one student: dates, state, amount, type and payment method. Arguments: student_client_id (required), date_from, date_to (YYYY-MM-DD, optional).",
+      "keywords": [
+        "hollihope",
+        "payments",
+        "платежи",
+        "оплата",
+        "счёт"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "hollihope.finance.payer_terms",
+      "backend": "hollihope",
+      "transport": "hollihope-rest",
+      "operation": "finance.payer_terms",
+      "scope": "hollihope_finance:read",
+      "description": "Payment terms of one student per group: paid and payable lessons, amount paid and the date a debt starts. Arguments: student_client_id (required), date_from, date_to (YYYY-MM-DD, default last 60 days). The payer's name is never returned.",
+      "keywords": [
+        "hollihope",
+        "payer",
+        "условия оплаты",
+        "оплачено",
+        "дата долга"
+      ],
+      "status": "implemented"
     }
   ]
 }

@@ -9,6 +9,7 @@ BACKEND_DISPATCH: dict[str, tuple[str, str]] = {
     "caldav": ("gateway_mcp.backends.caldav", "_call_caldav"),
     "gitlab-rest": ("gateway_mcp.backends.gitlab", "_call_gitlab"),
     "google-rest": ("gateway_mcp.backends.google", "_call_google"),
+    "hollihope-rest": ("gateway_mcp.backends.hollihope", "_call_hollihope"),
     "infra": ("gateway_mcp.backends.infra", "_call_infra"),
     "metrika-rest": ("gateway_mcp.backends.metrika", "_call_metrika"),
     "notification": ("gateway_mcp.backends.notifications", "_call_notifications"),
