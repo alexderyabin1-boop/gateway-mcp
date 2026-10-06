@@ -189,6 +189,49 @@ _PACKAGES: tuple[dict[str, Any], ...] = (
             _resource("gitlab", "project", "*", "read", "write"),
         ),
     },
+    {
+        "key": "progress-monitoring-manager",
+        "version": 1,
+        "title": "Менеджер: мониторинг прогресса обучения",
+        "description": (
+            "Чтение данных HolliHope только по своим ученикам: карточка, занятия, "
+            "оценки, отчёты педагогов и оплата обучения. Без записи."
+        ),
+        "risk": "standard",
+        "scopes": (
+            "tools:call",
+            "hollihope_students:read",
+            "hollihope_study:read",
+            "hollihope_finance:read",
+        ),
+        "resources": (
+            _resource("hollihope_students", "student", "*", "read"),
+            _resource("hollihope_study", "student", "*", "read"),
+            _resource("hollihope_finance", "student", "*", "read"),
+        ),
+    },
+    {
+        "key": "progress-monitoring-lead",
+        "version": 1,
+        "title": "Руководитель: мониторинг прогресса обучения",
+        "description": (
+            "То же, что у менеджера, по всем ученикам школы: карточка, занятия, "
+            "оценки, отчёты педагогов и оплата обучения. Без записи."
+        ),
+        "risk": "elevated",
+        "scopes": (
+            "tools:call",
+            "hollihope_students:read",
+            "hollihope_students:all",
+            "hollihope_study:read",
+            "hollihope_finance:read",
+        ),
+        "resources": (
+            _resource("hollihope_students", "student", "*", "read"),
+            _resource("hollihope_study", "student", "*", "read"),
+            _resource("hollihope_finance", "student", "*", "read"),
+        ),
+    },
 )
 
 

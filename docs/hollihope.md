@@ -56,6 +56,22 @@ Keys are the Gateway e-mail, login or subject (case-insensitive); values are
 HolliHope employee ids. The file is re-read on every call. Mount the directory
 that contains it, not the single file, so that edits are picked up.
 
+## Access packages
+
+Two packages in the Gateway catalog bundle the scopes above. Neither contains
+a write scope.
+
+| Package | For | Adds |
+|---|---|---|
+| `progress-monitoring-manager` | managers | `tools:call` and the three `hollihope_*:read` scopes; own students only |
+| `progress-monitoring-lead` | department lead and deputy | the same plus `hollihope_students:all` |
+
+An employee requests a package with `gateway_access_request_create`; an
+administrator decides with `gateway_admin_access_request_decide` (dry run
+first). Revoking the package removes every grant it created. A manager also
+needs an entry in the user map (see above), otherwise every per-student call
+is denied.
+
 ## Configuration
 
 | Variable | Meaning |
