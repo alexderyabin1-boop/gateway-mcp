@@ -79,6 +79,7 @@ DEFAULT_SUPPORTED_SCOPES = [
     "hollihope_students:all",
     "hollihope_students:read",
     "hollihope_study:read",
+    "edu_profile:read",
     "infra:read",
     "infra:ssh:exec",
     "mail:read",

@@ -2232,6 +2232,42 @@
         "дата долга"
       ],
       "status": "implemented"
+    },
+    {
+      "name": "edu.students.find",
+      "backend": "edu_data",
+      "transport": "edu-data-rest",
+      "operation": "students.find",
+      "scope": "edu_profile:read",
+      "description": "Find a student in the centre's student data service (edu-data). Arguments: query (name fragment, 3-64 characters). Returns at most 10 students with edu-data id, last and first name, status and current groups (subject, office). The caller sees only students available to him in edu-data: a manager sees all profiles, a teacher only his groups, an office head only his offices.",
+      "keywords": [
+        "edu-data",
+        "профиль ученика",
+        "найти ученика",
+        "ученик",
+        "student profile",
+        "обратная связь"
+      ],
+      "status": "implemented"
+    },
+    {
+      "name": "edu.student.profile",
+      "backend": "edu_data",
+      "transport": "edu-data-rest",
+      "operation": "student.profile",
+      "scope": "edu_profile:read",
+      "description": "Student profile for feedback to parents: per subject the group, teacher and office, target score, attendance, regular grades, KIM results in the centre's scales with lost tasks and topics and the group average, the teacher checklist and HolliHope report, parent and student survey answers with case status, past exam results, signals (risks) and gaps (missing data). Every fact carries its source and date. Arguments: student_id (UUID from edu.students.find), discipline (optional, e.g. 'Математика'). No contacts, addresses, documents or payments.",
+      "keywords": [
+        "edu-data",
+        "профиль ученика",
+        "скрипт обратной связи",
+        "КИМ",
+        "посещаемость",
+        "опрос",
+        "чек-лист",
+        "сигналы"
+      ],
+      "status": "implemented"
     }
   ]
 }
