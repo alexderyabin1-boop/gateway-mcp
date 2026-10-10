@@ -232,6 +232,24 @@ _PACKAGES: tuple[dict[str, Any], ...] = (
             _resource("hollihope_finance", "student", "*", "read"),
         ),
     },
+    {
+        "key": "student-profile-reader",
+        "version": 1,
+        "title": "Профиль ученика для обратной связи",
+        "description": (
+            "Чтение профиля ученика в сервисе данных учеников (edu-data): КИМ, "
+            "посещаемость, оценки, опросы, чек-листы. Какие ученики доступны, "
+            "определяет роль сотрудника в edu-data. Без записи."
+        ),
+        "risk": "standard",
+        "scopes": (
+            "tools:call",
+            "edu_profile:read",
+        ),
+        "resources": (
+            _resource("edu_profile", "student", "*", "read"),
+        ),
+    },
 )
 
 
