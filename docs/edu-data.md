@@ -1,4 +1,4 @@
-# edu-data connector (read-only)
+# edu-data connector
 
 edu-data — сервис данных учеников центра: реестр, КИМ по заданиям, опросы,
 чек-листы педагогов, посещаемость и оценки из HolliHope. Через Gateway агент
@@ -10,6 +10,7 @@ edu-data — сервис данных учеников центра: реест
 |---|---|---|
 | `edu.students.find` | `edu_profile:read` | `query` (3–64 символа) |
 | `edu.student.profile` | `edu_profile:read` | `student_id` (UUID из поиска), `discipline` (необязательно) |
+| `edu.feedback_script.save` | `edu_feedback:write` | `student_id`, `stage` (ОС-1…ОС-4), `content` (до 60 000 символов), `disciplines`, `profile_snapshot`; обязателен `idempotency_key` |
 
 ## Кто что видит
 
@@ -29,4 +30,7 @@ edu-data — сервис данных учеников центра: реест
 | `EDU_DATA_SERVICE_TOKEN` | тот же токен, что `EDU_DATA_SERVICE_TOKEN` в edu-data, не короче 32 символов |
 
 Токен передаётся только в заголовке `Authorization` и не возвращается вызывающему.
-Записи в edu-data через Gateway нет.
+Единственная запись через Gateway — черновик скрипта обратной связи: каждый вызов
+добавляет новую версию в профиль ученика (edu-data проверяет по роли сотрудника, что этот ученик ему доступен).
+Менять данные ученика, статус скрипта или чужие правки
+через Gateway нельзя — менеджер проверяет и правит черновик в edu-data.

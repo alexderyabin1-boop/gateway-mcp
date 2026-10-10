@@ -2268,6 +2268,23 @@
         "сигналы"
       ],
       "status": "implemented"
+    },
+    {
+      "name": "edu.feedback_script.save",
+      "backend": "edu_data",
+      "transport": "edu-data-rest",
+      "operation": "feedback_script.save",
+      "scope": "edu_feedback:write",
+      "requires_idempotency_key": true,
+      "description": "Save the agent's draft feedback script (ОС-1…ОС-4) to the student's profile in edu-data as a new version; the manager reviews and edits it there. Arguments: student_id (UUID), stage ('ОС-1'), content (markdown, up to 60000 characters), disciplines (list of subjects), profile_snapshot (the profile object the script was written from). Requires idempotency_key. Cannot change student data. Returns id, version and the link for the manager.",
+      "keywords": [
+        "edu-data",
+        "сохранить скрипт",
+        "черновик",
+        "обратная связь",
+        "ОС-1"
+      ],
+      "status": "implemented"
     }
   ]
 }

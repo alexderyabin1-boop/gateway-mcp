@@ -1,4 +1,4 @@
-"""Read-only edu-data backend: student search and the student profile.
+"""edu-data backend: student search, the student profile and the agent's draft feedback scripts.
 
 edu-data is the centre's student data service (registry, KIM results per task,
 surveys, teacher checklists, attendance and grades from HolliHope). It applies
@@ -8,7 +8,9 @@ gets only the students he is responsible for, an operator gets nothing.
 
 Design rules, enforced here:
 
-* Only the operations in ``OPERATIONS`` exist; each calls one fixed GET path.
+* Only the operations in ``OPERATIONS`` exist; each calls one fixed path. The
+  only write is saving the agent's own draft feedback script (a new version);
+  student data cannot be changed through the Gateway.
 * The service token is read from the server environment, sent in the
   Authorization header, and never returned.
 * Caller arguments are validated against an allowlist; the student id must be
@@ -17,6 +19,7 @@ Design rules, enforced here:
   e-mail is denied.
 """
 
+import json
 import os
 import re
 from typing import Any
@@ -29,11 +32,15 @@ from gateway_mcp.backends.common import BackendConfigError, BackendRouteError, _
 
 BACKEND = "edu_data"
 PROFILE_SCOPE = "edu_profile:read"
+FEEDBACK_SCOPE = "edu_feedback:write"
 
 _UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 _MIN_QUERY = 3
 _MAX_QUERY = 64
 _MAX_DISCIPLINE = 64
+_MAX_SCRIPT = 60_000
+_MAX_SNAPSHOT = 400_000
+_STAGES = {"ОС-1", "ОС-2", "ОС-3", "ОС-4"}
 
 
 def _actor():
@@ -63,6 +70,10 @@ def _reject_unknown(arguments: dict[str, Any], allowed: set[str]) -> None:
 
 
 async def _get(path: str, params: dict[str, str]) -> dict[str, Any]:
+    return await _request("GET", path, params=params)
+
+
+async def _request(method: str, path: str, *, params: dict[str, str] | None = None, body: Any = None) -> dict[str, Any]:
     actor = _actor()
     email = str(getattr(actor, "email", "") or "").strip()
     if not email:
@@ -70,9 +81,10 @@ async def _get(path: str, params: dict[str, str]) -> dict[str, Any]:
     timeout = float(os.getenv("GATEWAY_UPSTREAM_TIMEOUT_SECONDS", "60"))
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.request(
-            "GET",
+            method,
             f"{_base_url()}{path}",
-            params=params,
+            params=params or {},
+            json=body,
             headers={"Authorization": f"Bearer {_token()}", "X-Acting-User": email, "Accept": "application/json"},
         )
     try:
@@ -100,9 +112,7 @@ async def _op_students_find(arguments: dict[str, Any]) -> dict[str, Any]:
 
 async def _op_student_profile(arguments: dict[str, Any]) -> dict[str, Any]:
     _reject_unknown(arguments, {"student_id", "discipline"})
-    student_id = str(arguments.get("student_id") or "").strip().lower()
-    if not _UUID.match(student_id):
-        raise BackendRouteError("student_id must be the edu-data student id (UUID) from edu.students.find")
+    student_id = _student_id(arguments)
     params = {}
     discipline = str(arguments.get("discipline") or "").strip()
     if discipline:
@@ -112,9 +122,39 @@ async def _op_student_profile(arguments: dict[str, Any]) -> dict[str, Any]:
     return await _get(f"/api/students/{quote(student_id)}/profile", params)
 
 
+def _student_id(arguments: dict[str, Any]) -> str:
+    student_id = str(arguments.get("student_id") or "").strip().lower()
+    if not _UUID.match(student_id):
+        raise BackendRouteError("student_id must be the edu-data student id (UUID) from edu.students.find")
+    return student_id
+
+
+async def _op_feedback_script_save(arguments: dict[str, Any]) -> dict[str, Any]:
+    """Save the agent's draft script as a new version in the student's profile.
+    The agent can only add drafts; it cannot change student data or edit a manager's version."""
+    _reject_unknown(arguments, {"student_id", "stage", "content", "disciplines", "profile_snapshot"})
+    student_id = _student_id(arguments)
+    stage = str(arguments.get("stage") or "").strip().upper().replace("OS", "ОС")
+    if stage not in _STAGES:
+        raise BackendRouteError("stage must be one of ОС-1, ОС-2, ОС-3, ОС-4")
+    content = str(arguments.get("content") or "")
+    if not content.strip() or len(content) > _MAX_SCRIPT:
+        raise BackendRouteError(f"content must be 1 to {_MAX_SCRIPT} characters")
+    disciplines = arguments.get("disciplines") or []
+    if not isinstance(disciplines, list) or len(disciplines) > 20 or any(
+            not isinstance(d, str) or len(d) > _MAX_DISCIPLINE for d in disciplines):
+        raise BackendRouteError("disciplines must be a list of up to 20 subject names")
+    snapshot = arguments.get("profile_snapshot")
+    if snapshot is not None and (not isinstance(snapshot, dict) or len(json.dumps(snapshot, ensure_ascii=False)) > _MAX_SNAPSHOT):
+        raise BackendRouteError("profile_snapshot must be the profile object returned by edu.student.profile")
+    return await _request("POST", f"/api/students/{quote(student_id)}/feedback-scripts", body={
+        "stage": stage, "content": content, "disciplines": disciplines, "profile_snapshot": snapshot})
+
+
 OPERATIONS: dict[str, tuple[Any, str]] = {
     "students.find": (_op_students_find, PROFILE_SCOPE),
     "student.profile": (_op_student_profile, PROFILE_SCOPE),
+    "feedback_script.save": (_op_feedback_script_save, FEEDBACK_SCOPE),
 }
 
 

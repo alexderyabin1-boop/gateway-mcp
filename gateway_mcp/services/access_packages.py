@@ -234,20 +234,23 @@ _PACKAGES: tuple[dict[str, Any], ...] = (
     },
     {
         "key": "student-profile-reader",
-        "version": 1,
+        "version": 2,
         "title": "Профиль ученика для обратной связи",
         "description": (
             "Чтение профиля ученика в сервисе данных учеников (edu-data): КИМ, "
             "посещаемость, оценки, опросы, чек-листы. Какие ученики доступны, "
-            "определяет роль сотрудника в edu-data. Без записи."
+            "определяет роль сотрудника в edu-data. Агент может сохранить свой черновик "
+            "скрипта обратной связи в профиль ученика; данные ученика не меняются."
         ),
         "risk": "standard",
         "scopes": (
             "tools:call",
             "edu_profile:read",
+            "edu_feedback:write",
         ),
         "resources": (
             _resource("edu_profile", "student", "*", "read"),
+            _resource("edu_feedback", "student", "*", "write"),
         ),
     },
 )
