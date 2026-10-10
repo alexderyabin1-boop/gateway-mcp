@@ -80,6 +80,7 @@ DEFAULT_SUPPORTED_SCOPES = [
     "hollihope_students:read",
     "hollihope_study:read",
     "edu_profile:read",
+    "edu_feedback:write",
     "infra:read",
     "infra:ssh:exec",
     "mail:read",

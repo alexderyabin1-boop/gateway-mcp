@@ -100,6 +100,29 @@ class EduDataBackendTests(unittest.IsolatedAsyncioTestCase):
                 await _call_edu_data(_route("student.profile"), args)
         self.assertEqual(FakeAsyncClient.calls, [])
 
+    async def test_feedback_script_save_posts_draft(self) -> None:
+        FakeAsyncClient.response = FakeResponse({"id": "abc", "version": 2, "url": "/students/x/feedback/abc"})
+        args = {"student_id": STUDENT_ID, "stage": "ос-1", "content": "# Скрипт", "disciplines": ["Математика"],
+                "profile_snapshot": {"student": {"id": STUDENT_ID}}}
+        result = await _call_edu_data(_route("feedback_script.save", "edu_feedback:write"), args)
+        self.assertEqual(result["data"]["version"], 2)
+        method, url, kwargs = FakeAsyncClient.calls[0]
+        self.assertEqual((method, url), ("POST", f"{BASE_URL}/api/students/{STUDENT_ID}/feedback-scripts"))
+        self.assertEqual(kwargs["json"]["stage"], "ОС-1")
+        self.assertEqual(kwargs["json"]["disciplines"], ["Математика"])
+        self.assertEqual(kwargs["headers"]["X-Acting-User"], "Manager@Example.test")
+
+    async def test_feedback_script_arguments_are_validated(self) -> None:
+        good = {"student_id": STUDENT_ID, "stage": "ОС-1", "content": "текст"}
+        for bad in ({"stage": "ОС-9"}, {"content": " "}, {"content": "x" * 60_001}, {"student_id": "../staff"},
+                    {"disciplines": "Математика"}, {"disciplines": [1]}, {"profile_snapshot": "x"},
+                    {"status": "reviewed"}):
+            with self.assertRaises(BackendRouteError):
+                await _call_edu_data(_route("feedback_script.save", "edu_feedback:write"), {**good, **bad})
+        with self.assertRaises(BackendRouteError):
+            await _call_edu_data(_route("feedback_script.save"), good)
+        self.assertEqual(FakeAsyncClient.calls, [])
+
     async def test_denials_and_errors(self) -> None:
         FakeAsyncClient.response = FakeResponse({"error": "forbidden"}, 403)
         with self.assertRaises(PermissionError):
@@ -142,9 +165,11 @@ class EduDataBackendTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(r["scope"], OPERATIONS[r["operation"]][1])
             self.assertNotIn("http_method", r)
         self.assertIn("edu_profile:read", DEFAULT_SUPPORTED_SCOPES)
+        self.assertIn("edu_feedback:write", DEFAULT_SUPPORTED_SCOPES)
+        save = next(r for r in routes if r["operation"] == "feedback_script.save")
+        self.assertTrue(save["requires_idempotency_key"])
         package = next(p for p in access_package_catalog() if p["key"] == "student-profile-reader")
-        self.assertEqual(set(package["scopes"]), {"tools:call", "edu_profile:read"})
-        self.assertFalse(any(s.endswith(":write") for s in package["scopes"]))
+        self.assertEqual(set(package["scopes"]), {"tools:call", "edu_profile:read", "edu_feedback:write"})
 
 
 if __name__ == "__main__":
